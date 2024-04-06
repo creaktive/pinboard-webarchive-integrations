@@ -21,6 +21,8 @@ for my $item (reverse $result->dom('item')->@*) {
     next if $date lt $from;
 
     my $result = $ua->get('https://web.archive.org/save/' . url_escape $link)->result;
+
+    next if $result->code == 520;
     if ($result->is_error) {
         sleep 300;
         redo;
