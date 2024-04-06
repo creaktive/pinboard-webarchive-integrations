@@ -35,7 +35,7 @@ sub main($input) {
         my $date = $1 . $2 . $3;
 
         my $url = 'https://archive.org/wayback/available'
-            . '?url=' . url_escape $pin->{href}
+            . '?url=' . url_escape($pin->{href})
             . '&timestamp=' . $date;
 
         say $url;
