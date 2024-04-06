@@ -19,7 +19,12 @@ for my $item (reverse $result->dom('item')->@*) {
     my $date = $item->at('date')->text;
 
     next if $date lt $from;
-    $ua->get('https://web.archive.org/save/' . url_escape $link);
+
+    my $result = $ua->get('https://web.archive.org/save/' . url_escape $link)->result;
+    if ($result->is_error) {
+        sleep 300;
+        redo;
+    }
 }
 
 exit 0;
