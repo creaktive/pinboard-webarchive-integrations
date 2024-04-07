@@ -13,8 +13,7 @@ use constant PROCESS_FROM => time - 3 * 86_400;
 my $ua = Mojo::UserAgent->new(inactivity_timeout => 0);
 my $from = Mojo::Date->new(PROCESS_FROM)->to_datetime;
 
-my $result = $ua->get(PINBOARD_RSS_URL)->result;
-for my $item (reverse $result->dom('item')->@*) {
+for my $item (reverse $ua->get(PINBOARD_RSS_URL)->result->dom('item')->@*) {
     my $link = $item->at('link')->text;
     my $date = $item->at('date')->text;
 
