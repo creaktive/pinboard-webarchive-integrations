@@ -16,7 +16,7 @@ sub main($input) {
     my $path = Mojo::File->new($input);
     my $pinboard = decode_json $path->slurp;
 
-    my %seen = qw(/ 1);
+    my %seen;
     if (open(my $fh, '<:raw', OUTPUT)) {
         while (my $line = <$fh>) {
             my $data = decode_json $line;
@@ -29,6 +29,7 @@ sub main($input) {
     my $ua = Mojo::UserAgent->new(inactivity_timeout => 0);
     for my $pin (shuffle $pinboard->@*) {
         next if exists $seen{$pin->{href}};
+        next unless $pin->{href} =~ m{^https?://}x;
 
         ($pin->{time} =~ m{^([0-9]{4})-([0-9]{2})-([0-9]{2})}x)
             or die "can't parse time: @{[ $pin->{time} ]}\n";
