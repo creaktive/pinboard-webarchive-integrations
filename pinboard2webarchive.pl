@@ -22,6 +22,7 @@ for my $item (reverse $ua->get(PINBOARD_RSS_URL)->result->dom('item')->@*) {
     my $result = $ua->get('https://web.archive.org/save/' . url_escape $link)->result;
 
     next if $result->code == 520;
+    next if $result->code == 523;
     if ($result->is_error) {
         sleep 300;
         redo;

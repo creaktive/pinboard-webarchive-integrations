@@ -52,7 +52,7 @@ sub main($input) {
             sleep 5;
         } else {
             sleep 60;
-            redo;
+            # redo;
         }
     }
 
