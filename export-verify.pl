@@ -7,15 +7,29 @@ use List::Util qw(shuffle);
 
 use Mojo::File;
 use Mojo::JSON qw(decode_json);
+use Mojo::URL;
 use Mojo::UserAgent;
 use Mojo::Util qw(url_escape);
 
 use constant OUTPUT => 'webarchive.json';
+use constant BLACKLIST => [qw[
+    archive.org
+    feedly.com
+    feedproxy.google.com
+    feeds.feedburner.com
+    feeds.gawker.com
+    rss.slashdot.org
+    t.co
+    twitter.com
+    web.archive.org
+    www.youtube.com
+]];
 
 sub main($input) {
     my $path = Mojo::File->new($input);
     my $pinboard = decode_json $path->slurp;
 
+    my %blacklist = map { $_ => 1 } BLACKLIST->@*;
     my %seen;
     if (open(my $fh, '<:raw', OUTPUT)) {
         while (my $line = <$fh>) {
@@ -28,15 +42,17 @@ sub main($input) {
 
     my $ua = Mojo::UserAgent->new(inactivity_timeout => 0);
     for my $pin (shuffle $pinboard->@*) {
-        next if exists $seen{$pin->{href}};
-        next unless $pin->{href} =~ m{^https?://}x;
+        my $href = Mojo::URL->new($pin->{href});
+        next unless $href->protocol =~ m{^https?$}x;
+        next if exists $blacklist{$href->host};
+        next if exists $seen{$href};
 
         ($pin->{time} =~ m{^([0-9]{4})-([0-9]{2})-([0-9]{2})}x)
             or die "can't parse time: @{[ $pin->{time} ]}\n";
         my $date = $1 . $2 . $3;
 
         my $url = 'https://archive.org/wayback/available'
-            . '?url=' . url_escape($pin->{href})
+            . '?url=' . url_escape($href)
             . '&timestamp=' . $date;
 
         say $url;
