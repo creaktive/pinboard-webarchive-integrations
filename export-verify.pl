@@ -41,7 +41,9 @@ sub main($input) {
     }
 
     my $ua = Mojo::UserAgent->new(inactivity_timeout => 0);
-    for my $pin (shuffle $pinboard->@*) {
+
+    my @urls;
+    for my $pin ($pinboard->@*) {
         my $href = Mojo::URL->new($pin->{href});
         next unless $href->protocol =~ m{^https?$}x;
         next if exists $blacklist{$href->host};
@@ -55,6 +57,13 @@ sub main($input) {
             . '?url=' . url_escape($href)
             . '&timestamp=' . $date;
 
+         push @urls, $url;
+    }
+
+    printf STDERR "checking %d URLs\n", scalar @urls;
+    my $c = 0;
+    for my $url (shuffle @urls) {
+        printf STDERR "%.1f%%\t", 100 * (++$c / scalar @urls);
         say $url;
         my $result = $ua->get($url)->result;
         if ($result->is_success
