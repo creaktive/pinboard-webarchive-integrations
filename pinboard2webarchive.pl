@@ -11,6 +11,9 @@ use constant PINBOARD_RSS_URL => 'https://feeds.pinboard.in/rss/u:creaktive/';
 use constant PROCESS_FROM => time - 3 * 86_400;
 
 my $ua = Mojo::UserAgent->new(inactivity_timeout => 0);
+$ua->proxy->https('socks://192.168.0.2:9050');
+say STDERR $ua->get('https://ifconfig.me/ip')->result->body;
+
 my $from = Mojo::Date->new(PROCESS_FROM)->to_datetime;
 
 my $retries = 0;

@@ -14,6 +14,7 @@ use Mojo::Util qw(url_escape);
 use constant OUTPUT => 'webarchive.json';
 use constant BLACKLIST => [qw[
     archive.org
+    bash.org.ru
     feedly.com
     feedproxy.google.com
     feeds.feedburner.com
@@ -22,6 +23,7 @@ use constant BLACKLIST => [qw[
     t.co
     twitter.com
     web.archive.org
+    whiplash.net
     www.youtube.com
 ]];
 
@@ -41,6 +43,8 @@ sub main($input) {
     }
 
     my $ua = Mojo::UserAgent->new(inactivity_timeout => 0);
+    $ua->proxy->https('socks://192.168.0.2:9050');
+    say STDERR $ua->get('https://ifconfig.me/ip')->result->body;
 
     my @urls;
     for my $pin ($pinboard->@*) {
