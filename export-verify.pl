@@ -65,14 +65,17 @@ sub main($input) {
     }
 
     printf STDERR "checking %d URLs\n", scalar @urls;
-    my $c = 0;
+    my $c = 1;
     for my $url (shuffle @urls) {
-        printf STDERR "%.1f%%\t", 100 * (++$c / scalar @urls);
+        printf STDERR "%.1f%%\t", 100 * ($c / scalar @urls);
         say $url;
-        my $result = $ua->get($url)->result;
-        if ($result->is_success
+        my $result = eval { $ua->get($url)->result };
+        if ($result
+            and $result->is_success
             and 'HASH' eq ref eval { decode_json $result->body }
         ) {
+            ++$c;
+
             open(my $fh, '>>:raw', OUTPUT)
                 or die "can't write to @{[ OUTPUT ]}: $@\n";
             say $fh $result->body;
